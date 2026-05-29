@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+
+# Keep example image data and generated outputs out of the repository.
+pic/
+Kiera/
+results/
+*.tif
+*.tiff
+*.zip
