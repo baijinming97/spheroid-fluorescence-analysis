@@ -1,18 +1,27 @@
-# spheroid 荧光分析
+# Spheroid Fluorescence Analysis
 
-Fiji/ImageJ macro for spheroid fluorescence quantification from separate channel TIFF files.
+A Fiji/ImageJ macro for measuring fluorescence intensity in spheroid images.
 
-## What It Does
+It detects the main spheroid, measures GFP/RFP fluorescence in the same ROI, optionally includes DAPI, subtracts background, and saves CSV results plus QC overlays.
 
-- Detects the spheroid ROI from merged fluorescence signal.
-- Supports two-channel data: `sample_GFP.tif` and `sample_RFP.tif`.
-- Also supports optional DAPI: `sample_DAPI.tif`.
-- Measures each available channel in the same spheroid ROI.
-- Uses either outside-spheroid background or a local background ring.
-- Saves detail and summary CSV results.
-- Optionally saves semi-transparent QC overlays on the raw merged image.
+## Download
 
-## Expected Input Names
+Download the whole repository:
+
+1. Open the GitHub page.
+2. Click `Code`.
+3. Click `Download ZIP`.
+4. Unzip the file.
+
+Or download only the macro:
+
+1. Open `Spheroid_Fluorescence_Analysis.ijm`.
+2. Click `Raw`.
+3. Save the file as `Spheroid_Fluorescence_Analysis.ijm`.
+
+## Image Names
+
+Put the channel images for each sample in one folder.
 
 Required:
 
@@ -27,83 +36,82 @@ Optional:
 sample_DAPI.tif
 ```
 
-If DAPI is missing, the macro automatically runs in GFP/RFP mode and skips DAPI output.
+The sample name must match before the channel suffix. For example:
 
-## Fiji Usage
+```text
+BT-549 Day 10 Vehicle_0007_GFP.tif
+BT-549 Day 10 Vehicle_0007_RFP.tif
+BT-549 Day 10 Vehicle_0007_DAPI.tif
+```
+
+If DAPI is missing, the macro still runs with GFP and RFP only.
+
+## Use In Fiji
 
 Quick run:
 
-```text
-Fiji > Plugins > Macros > Run...
-```
+1. Open Fiji.
+2. Go to `Plugins > Macros > Run...`.
+3. Select `Spheroid_Fluorescence_Analysis.ijm`.
+4. Choose the folder that contains the TIFF files.
+5. Keep the default settings for a first run.
+6. Click `OK`.
 
-Select:
-
-```text
-Spheroid_Fluorescence_Analysis.ijm
-```
-
-Plugin-style install:
+Install as a Fiji plugin:
 
 1. Copy `Spheroid_Fluorescence_Analysis.ijm` into the Fiji `plugins` folder.
 2. Restart Fiji.
-3. Run it from the Fiji Plugins menu.
+3. Run it from the `Plugins` menu.
 
-## Main Settings
+## Important Settings
 
-- `Merged signal used to define spheroid ROI`: use `Auto` by default.
-  - With DAPI: `DAPI+GFP+RFP`
-  - Without DAPI: `GFP+RFP`
-- `Background ROI method`: default is `Outside spheroid`.
-  - Inside the spheroid boundary is spheroid.
-  - Outside the spheroid boundary is background.
-- `Final spheroid ROI adjustment`: use negative values to shrink the boundary, positive values to expand it.
+- `Merged signal used to define spheroid ROI`: use `Auto` for most images.
+- `Auto-threshold method`: `Triangle` is the default.
+- `Minimum spheroid size`: increase this if small debris is detected.
+- `Final spheroid ROI adjustment`: use a negative value to shrink the ROI or a positive value to expand it.
+- `Background ROI method`: use `Outside spheroid` first; use `Local ring around spheroid` if the background varies across the image.
+- `Pause for manual ROI check/edit`: turn this on if you want to inspect or edit each ROI before measurement.
 
-## Outputs
+## Results
 
-The macro creates a `results` folder inside the input folder:
+The macro creates a `results` folder inside the input folder.
+
+Main output files:
 
 ```text
-detail_results.csv
-summary_results.csv
+results/detail_results.csv
+results/summary_results.csv
 ```
 
-The main result columns begin with:
+If QC overlays are enabled, images are saved here:
 
 ```text
-File
-Channel
-Spheroid_Area
-Mean_Background
-Integrated_Density
+results/QC_mask_overlays/
 ```
 
-Where:
+The most useful result columns are:
+
+- `Spheroid_Area`
+- `Spheroid_Mean`
+- `Mean_Background`
+- `Corrected_Mean`
+- `Integrated_Density`
+- `CTCF`
+
+Formulas:
 
 ```text
-Integrated_Density = Spheroid_Area x Spheroid_Mean
 Corrected_Mean = Spheroid_Mean - Mean_Background
+Integrated_Density = Spheroid_Area x Spheroid_Mean
 CTCF = Integrated_Density - Spheroid_Area x Mean_Background
 ```
 
-## QC
-
-Check files in:
-
-```text
-QC_mask_overlays/
-```
-
-The overlay shows the raw merged image with a semi-transparent spheroid mask. The boundary should cover the spheroid body without including too much empty background.
-
 ## Notes
 
-- Use original single-channel TIFF files for quantification.
-- Merged RGB images are for QC/visual inspection only.
-- The macro assumes one main spheroid per field and keeps the largest detected object.
+- Use original single-channel TIFF files for measurement.
+- Merged RGB images should only be used for visual checking, not quantification.
+- The macro assumes one main spheroid per image and keeps the largest detected object.
 
 ## Acknowledgements
 
-Developed and tested with example spheroid image sets from Jess and Kiera.
-
-Thank you to Jess and Kiera for providing representative datasets and workflow feedback.
+Developed and tested with representative spheroid image sets from Jess and Kiera.
